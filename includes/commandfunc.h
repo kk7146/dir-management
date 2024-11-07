@@ -13,14 +13,18 @@
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
+#include "util.h"
 
-
-void ls_func();
-void chmod_func(char *perm_str, char *filename);
-void cp_func(const char *source, const char *destination);
-void cat_func(char *filename);
-void apply_symbolic_permissions(char *permissions, mode_t *mode);
-void help_func();
-void print_permissions(mode_t mode);
+void cmd_ls();
+void cmd_chmod(char *perm_str, char *filename);
+void cmd_cat(char* current_dir, char *tok_str);
+void cmd_help();
+void cmd_cd(char* current_dir, char *tok_str);
+void cmd_mkdir(char* current_dir, char *tok_str);
+void cmd_rmdir(char* current_dir, char *tok_str);
+void cmd_rename(char* current_dir, char *tok_str);
+void cmd_ln(char* current_dir, char *tok_str);
+void cmd_rm(char* current_dir, char *tok_str);
+void cmd_cp(char* current_dir, char *tok_str);
 
 #endif
