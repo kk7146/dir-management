@@ -21,7 +21,15 @@ char* resolve_path(const char *current_dir, const char *path) { // path를 받�
     if (!validate_path(resolved_path))
     {
         free(resolved_path);
-        return (char*)malloc(1);
+        return NULL;
     }
     return resolved_path;
+}
+
+int check_null_pointer(const char *ch) { // malloc 터질 우려
+    if (ch == NULL) {
+        perror("malloc");
+        return 1;
+    }
+    return 0;
 }

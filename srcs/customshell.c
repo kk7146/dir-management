@@ -1,17 +1,6 @@
 #include "customshell.h"
 
-#define MAX_CMD_SIZE    (128)
-#define BASE_DIR "/private/tmp/test"
-
-int check_null_pointer(const char *ch) { // malloc 터질 우려
-    if (ch == NULL) {
-        perror("malloc");
-        return 1;
-    }
-    return 0;
-}
-
-int ensure_directory_exists() { // BASE_DIR이 존재하는지 확인하고 없으면 만듦
+static int ensure_directory_exists() { // BASE_DIR이 존재하는지 확인하고 없으면 만듦
     struct stat st;
 
     if (stat(BASE_DIR, &st) != 0)
@@ -22,7 +11,7 @@ int ensure_directory_exists() { // BASE_DIR이 존재하는지 확인하고 없�
     return 0;
 }
 
-void init_dir() { // 현재 위치가 BASE_DIR 안쪽이 아니면 BASE_DIR로 옮김
+static void init_dir() { // 현재 위치가 BASE_DIR 안쪽이 아니면 BASE_DIR로 옮김
     char *current_dir;
 
     current_dir = getcwd(NULL, 0);
@@ -104,20 +93,4 @@ int execute_shell(char *command) {
         free(current_dir);
     }
     return -1;
-}
-
-int main(int argc, char **argv) {
-    char *command;
-
-    if (init() == -1) // 초기화
-        return -1;
-
-    command = (char*)malloc(MAX_CMD_SIZE);
-    if (check_null_pointer(command))
-        return -1;
-
-    if (execute_shell(command) == -1)
-        return -1;
-    free(command);
-    return 0;
 }

@@ -1,4 +1,4 @@
-SRCS	= srcs/customshell.c srcs/commandfunc.c srcs/util.c
+SRCS	= srcs/main.c srcs/customshell.c srcs/commandfunc.c srcs/util.c
 OBJS	= $(SRCS:.c=.o)
 NAME	= custom-shell
 INCL	= includes

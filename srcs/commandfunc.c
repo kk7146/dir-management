@@ -115,7 +115,7 @@ void cmd_ls() {
     struct passwd *pw;
     struct group *gr;
     char timebuf[64];
-    char link_target[MAX_CMD_SIZE + 1];
+    char link_target[MAX_DIR_SIZE + 1];
 
     dir = opendir(".");
     if (dir == NULL) {
@@ -201,10 +201,8 @@ void cmd_mkdir(char* current_dir, char *tok_str) {
         return ;
     }
     new_path = resolve_path(current_dir, tok_str);
-    if (!validate_path(new_path))
+    if (mkdir(new_path, 0777) != 0)
         printf("mkdir: cannot create directory\n");
-    else
-        mkdir(new_path, 0777);
     free(new_path);
 }
 
@@ -218,10 +216,8 @@ void cmd_rmdir(char* current_dir, char *tok_str) {
         return ;
     }
     new_path = resolve_path(current_dir, tok_str);
-    if (!validate_path(new_path))
+    if (rmdir(new_path) != 0)
         printf("rmdir: failed to remove\n");
-    else
-        rmdir(new_path);
     free(new_path);
 }
 
@@ -231,72 +227,126 @@ void cmd_rename(char* current_dir, char *tok_str) {
     char * new_src;
     char * new_dest;
 
-    if (src == NULL || dest == NULL)
+    if (src == NULL || dest == NULL) // argument 없는 것 처리
     {
         printf("rename: missing source or target argument\n");
         return ;
     }
     
-    new_src = resolve_path(current_dir, src);
+    new_src = resolve_path(current_dir, src); // 일단 실패하면 null 반환
+    if (check_null_pointer(new_src)) // malloc 실패 처리
+        return ;
     new_dest = resolve_path(current_dir, dest);
-    if (!validate_path(new_src) || !validate_path(new_dest))
+    if (check_null_pointer(current_dir)) // malloc 실패 처리.
+    {
+        free(new_src);
         printf("rename: failed to rename\n");
-    else
-        rename(new_src, new_dest);
+        return ;
+    }
+    if (rename(new_src, new_dest) != 0)
+        printf("rename: failed to rename\n");
+    free(new_src);
+    free(new_dest);
 }
 
 void cmd_rm(char* current_dir, char *tok_str) {
     char *file = strtok(NULL, " \n");
+    char * new_path;
+
     if (file == NULL)
+    {
         printf("rm: missing argument\n");
-    else if (unlink(file) != 0)
+        return ;
+    }
+    new_path = resolve_path(current_dir, tok_str);
+    if (unlink(new_path) != 0)
         perror("rm");
     else
         printf("File removed: %s\n", file);
+    free(new_path);
 }
 
 void cmd_chmod(char* current_dir, char *tok_str) {
     char *perm_str = strtok(NULL, " \n");
     char *filename = strtok(NULL, " \n");
+    char * new_path;
+    
     if (perm_str == NULL || filename == NULL)
+    {
         printf("chmod: missing permission or filename argument\n");
-    else if (!validate_path(resolve_path(current_dir, filename)))
-        printf("chmod: invalid path\n");
-    else
-        chmod_func(perm_str, filename);
+        return ;
+    }
+    new_path = resolve_path(current_dir, tok_str);
+    chmod_func(perm_str, new_path);
+    free(new_path);
 }
 
 void cmd_cat(char* current_dir, char *tok_str) {
     char *filename = strtok(NULL, " \n");
+    char * new_path;
+
     if (filename == NULL)
+    {
         printf("cat: missing filename argument\n");
-    else if (!validate_path(resolve_path(current_dir, filename)))
-        printf("cat: invalid path\n");
-    else
-        cat_func(filename);
+        return ;
+    }
+    new_path = resolve_path(current_dir, tok_str);
+    cat_func(filename);
+    free(new_path);
 }
 
 void cmd_cp(char* current_dir, char *tok_str) {
     char *src = strtok(NULL, " \n");
     char *dest = strtok(NULL, " \n");
+    char * new_src;
+    char * new_dest;
+
     if (src == NULL || dest == NULL)
+    {
         printf("cp: missing source or destination argument\n");
-    else if (!validate_path(resolve_path(current_dir, src)) || !validate_path(resolve_path(current_dir, dest)))
-        printf("cp: invalid path\n");
-    else
-        cp_func(src, dest);
+        return ;
+    }
+    new_src = resolve_path(current_dir, src); // 일단 실패하면 null 반환
+    if (check_null_pointer(new_src)) // malloc 실패 처리
+        return ;
+    new_dest = resolve_path(current_dir, dest);
+    if (check_null_pointer(current_dir)) // malloc 실패 처리.
+    {
+        free(new_src);
+        printf("rename: failed to rename\n");
+        return ;
+    }
+    cp_func(new_src, new_dest);
+    free(new_src);
+    free(new_dest);
 }
 
 void cmd_ln(char* current_dir, char *tok_str) {
     char *option = strtok(NULL, " \n");
     char *original = NULL;
     char *new_link = NULL;
+    char * new_src;
+    char * new_dest;
+
     if (option && strcmp(option, "-s") == 0) {
         original = strtok(NULL, " \n");
         new_link = strtok(NULL, " \n");
+
         if (original == NULL || new_link == NULL)
+        {
             printf("ln: missing original or new link argument\n");
-        else if (symlink(original, new_link) != 0)
+            return ;
+        }
+        new_src = resolve_path(current_dir, original); // 일단 실패하면 null 반환
+        if (check_null_pointer(new_src)) // malloc 실패 처리
+            return ;
+        new_dest = resolve_path(current_dir, new_link);
+        if (check_null_pointer(current_dir)) // malloc 실패 처리.
+        {
+            free(new_src);
+            return ;
+        }
+        else if (symlink(new_src, new_dest) != 0)
             perror("ln -s");
         else
             printf("Symbolic link created: %s -> %s\n", new_link, original);
@@ -304,10 +354,24 @@ void cmd_ln(char* current_dir, char *tok_str) {
         original = option;
         new_link = strtok(NULL, " \n");
         if (original == NULL || new_link == NULL)
+        {
             printf("ln: missing original or new link argument\n");
-        else if (link(original, new_link) != 0)
+            return ;
+        }
+        new_src = resolve_path(current_dir, original); // 일단 실패하면 null 반환
+        if (check_null_pointer(new_src)) // malloc 실패 처리
+            return ;
+        new_dest = resolve_path(current_dir, new_link);
+        if (check_null_pointer(current_dir)) // malloc 실패 처리.
+        {
+            free(new_src);
+            return ;
+        }
+        if (link(new_src, new_dest) != 0)
             perror("ln");
         else
             printf("Hard link created: %s -> %s\n", new_link, original);
     }
+    free(new_src);
+    free(new_dest);
 }
