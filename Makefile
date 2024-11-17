@@ -1,22 +1,42 @@
-SRCS	= srcs/main.c srcs/customshell.c srcs/commandfunc.c srcs/util.c
-OBJS	= $(SRCS:.c=.o)
-NAME	= custom-shell
-INCL	= includes
-FLAG	= -Wall -Werror -Wextra
-CC		= gcc
+#file name
+NAME			=	custom-shell
 
-all: $(NAME)
+#command
+CC				=	cc
+AR				=	ar
+RM				=	rm -rf
 
-.c.o :
-	$(CC) -c $< -o $(<:.c=.o) -I $(INCL)
+#directory
+SRC_DIR			=	srcs/
+INC_DIR			=	./includes/
+LIB_DIR			=	./libcmd
+LIB_NAME		=	libcmd.a
+LIBCMD			=	$(addprefix $(LIB_DIR)/, $(LIB_NAME))
 
-$(NAME) : $(OBJS)
-	$(CC) $(FLAG) -o $(NAME) $(OBJS)
+#srcs
+SRCS			=	srcs/main.c srcs/customshell.c srcs/util.c srcs/commandmanager.c
+OBJS			=	$(SRCS:.c=.o)
+
+all:	$(NAME)
+
+.c.o: 
+	$(CC) -c $< -o $@ -I $(INC_DIR)
+
+$(LIBCMD):
+	make -C $(LIB_DIR) all
+
+$(NAME): $(OBJS) $(LIBCMD)
+	$(CC) -o $(NAME) $(OBJS) -L$(LIB_DIR) -lcmd
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) ./srcs/$(NAME)
+	make -C $(LIB_DIR) clean
 
 fclean: clean
-	rm -f $(NAME)
+	make -C $(LIB_DIR) fclean
+	$(RM) $(NAME)
 
-re: fclean all
+re:	fclean all
+	make -C $(LIB_DIR) re
+
+.PHONY: all clean fclean re libcmd

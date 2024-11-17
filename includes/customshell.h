@@ -1,10 +1,11 @@
 #ifndef CUSTOMSHELL_H
-#define CUSTOMSHELL_H
+# define CUSTOMSHELL_H
 
-#include "commandfunc.h"
-#include "util.h"
+#define MAX_ARG             (4)
+
+# include "commandmanager.h"
 
 int init();
-int execute_shell(char *command);
+int execute_shell(char *command, cmd_node *const head);
 
 #endif

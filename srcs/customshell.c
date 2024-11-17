@@ -19,6 +19,33 @@ static void init_dir() { // 현재 위치가 BASE_DIR 안쪽이 아니면 BASE_D
         chdir(BASE_DIR);
 }
 
+static void handle_sigint(int sig) {
+    printf("Ctrl+C is disabled.");
+}
+
+static int print_shell_dir() {
+    char *current_dir;
+
+    current_dir = getcwd(NULL, 0);
+    if (check_null_pointer(current_dir))
+        return -1;
+    printf("%s $ ", current_dir + strlen(BASE_DIR));
+    free(current_dir);
+    return 0;
+}
+
+static void input_argc_argv(int *input_argc, char** input_argv, char *tok_str) {
+    input_argv[0] = tok_str;
+
+    for ((*input_argc) = 1; (*input_argc) < MAX_ARG; (*input_argc)++) {
+        if ((tok_str = strtok(NULL, " \n"))) {
+            input_argv[(*input_argc)] = tok_str;
+        } else {
+            return ;
+        }
+    }
+}
+
 int init() { // 프로그램 실행 경로가 BASE_DIR이 아닌 경우 해당 경로로 이동. 없으면 파일 만들고. 
     if (ensure_directory_exists() == -1)
         return -1;
@@ -26,71 +53,34 @@ int init() { // 프로그램 실행 경로가 BASE_DIR이 아닌 경우 해당 �
     return 0;
 }
 
-int execute_shell(char *command) {
-    char *current_dir, *tok_str;
+int execute_shell(char *command, cmd_node *const head) {
+    char *tok_str;
+    char *input_argv[MAX_ARG];
+    int  input_argc;
+    cmd_node *node;
 
+    signal(SIGINT, handle_sigint);
     while (1) {
-        current_dir = getcwd(NULL, 0);
-        if (check_null_pointer(current_dir))
+        node = head;
+        if (print_shell_dir() != 0)
             return -1;
-
-        printf("%s $ ", current_dir + strlen(BASE_DIR));
-        if (fgets(command, MAX_CMD_SIZE-1, stdin) == NULL) {
-            free(current_dir);
+        if (fgets(command, MAX_CMD_SIZE-1, stdin) == NULL)
             return -1;
-        }
 
         tok_str = strtok(command, " \n");
-        if (tok_str == NULL)
-            continue; // 이거 없애고 싶음
-
-        if (strcmp(tok_str, "quit") == 0)
+        if (strcmp(tok_str, "help") == 0)
+            help(node);
+        else if (strcmp(tok_str, "quit") == 0)
             return 0;
-
-        else if (strcmp(tok_str, "cd") == 0)
-            cmd_cd(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "help") == 0)
-            cmd_help();
-
-        else if (strcmp(tok_str, "mkdir") == 0)
-            cmd_mkdir(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "rmdir") == 0)
-            cmd_rmdir(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "rename") == 0)
-            cmd_rename(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "ln") == 0)
-            cmd_ln(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "rm") == 0)
-            cmd_rm(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "chmod") == 0)
-            cmd_chmod(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "ls") == 0)
-            cmd_ls();
-
-        else if (strcmp(tok_str, "cat") == 0)
-            cmd_cat(current_dir, tok_str);
-
-        else if (strcmp(tok_str, "cp") == 0)
-            cmd_cp(current_dir, tok_str);
-
         else {
-            printf("your command: %s\n", tok_str);
-            printf("and argument is ");
-            tok_str = strtok(NULL, " \n");
-            if (tok_str == NULL) {
-                printf("NULL\n");
-            } else {
-                printf("%s\n", tok_str);
-            }
+            input_argc_argv(&input_argc, input_argv, tok_str);
+            node = find_command(node, input_argv[0]);
+            if (node != NULL)
+                node->cmd_func(input_argc, input_argv);
+            else
+                printf("%s: command not found\n", input_argv[0]);
         }
-        free(current_dir);
+        optind = 1;
     }
     return -1;
 }
