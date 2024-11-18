@@ -57,6 +57,7 @@ void cmd_ps(int argc, char **argv) {
                 return;
         }
     }
+    ps_func(a_flag, x_flag, u_flag);
 }
 
 void usage_ps() {

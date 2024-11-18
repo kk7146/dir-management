@@ -89,5 +89,4 @@ void usage_kill() {
     printf("Usage: kill [-s signal_name] <pid> ...\n");
     printf("  -s signal_name  : Specify the signal to be sent (default is TERM)\n");
     printf("  -l              : List all signal names\n");
-    printf("Example: kill -s KILL 1234\n");
 }

@@ -23,7 +23,7 @@ static void handle_sigint(int sig) {
     printf("Ctrl+C is disabled.");
 }
 
-static int print_shell_dir() {
+static int print_shell_dir() { // 현재 위치 출력
     char *current_dir;
 
     current_dir = getcwd(NULL, 0);
@@ -34,7 +34,7 @@ static int print_shell_dir() {
     return 0;
 }
 
-static void input_argc_argv(int *input_argc, char** input_argv, char *tok_str) {
+static void input_argc_argv(int *input_argc, char** input_argv, char *tok_str) { // 쉘 내부 argc, argv로 변경.
     input_argv[0] = tok_str;
 
     for ((*input_argc) = 1; (*input_argc) < MAX_ARG; (*input_argc)++) {
@@ -68,6 +68,8 @@ int execute_shell(char *command, cmd_node *const head) {
             return -1;
 
         tok_str = strtok(command, " \n");
+        if (tok_str == NULL)
+            continue ;
         if (strcmp(tok_str, "help") == 0)
             help(node);
         else if (strcmp(tok_str, "quit") == 0)
