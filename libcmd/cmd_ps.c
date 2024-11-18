@@ -16,7 +16,7 @@ static void ps_func(int a_flag, int x_flag, int u_flag) {
     for (int pid = 1; pid < PID_SIZE; ++pid) {  // PID 범위
         if (proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &proc, sizeof(proc)) > 0) {
             // 간단한 필터링: 옵션에 따라 조건을 설정할 수 있음
-            if (!a_flag && proc.pbi_uid != getuid()) {
+            if (proc.pbi_uid != getuid()) {
                 continue;  // -a 옵션이 없으면 현재 사용자만 표시
             }
 
@@ -38,7 +38,7 @@ static void ps_func(int a_flag, int x_flag, int u_flag) {
 void cmd_ps(int argc, char **argv) {
     int opt;
     int a_flag = 0;    // -a 옵션 플래그 (다른 사용자와 터미널에 연결된 프로세스 포함)
-    int x_flag = 0;    // -x 옵션 플래그 (터미널에 연결되지 않은 프로세스 포함, 단순 구현에서는 사용 안 함)
+    int x_flag = 0;    // -x 옵션 플래그 (터미널에 연결되지 않은 프로세스 포함)
     int u_flag = 0;    // -u 옵션 플래그 (사용자 이름 포함)
 
     while ((opt = getopt(argc, argv, "axu")) != -1) {
@@ -62,7 +62,7 @@ void cmd_ps(int argc, char **argv) {
 
 void usage_ps() {
     printf("Usage: ps [-a] [-x] [-u]\n");
-    printf("  -a  Include processes from other users and attached to a terminal\n");
+    printf("  -a  Include processes from other users and attached to a terminal(미구현)\n");
     printf("  -x  Include processes not attached to a terminal (미구현)\n");
     printf("  -u  Display the user name associated with each process\n");
 }

@@ -1,27 +1,6 @@
 #include "libcmd.h"
 #include <libgen.h>
 
-// 부모 디렉토리 제거 함수
-void remove_parent_directories(char *path, int v_flag) {
-    char *parent_path = strdup(path);  // dirname() 함수 사용을 위해 경로 복제
-    if (!parent_path) {
-        perror("strdup");
-        return;
-    }
-
-    while (strcmp(parent_path, BASE_DIR) != 0) {
-        if (rmdir(parent_path) != 0) {
-            perror("rmdir");
-            break;
-        }
-        if (v_flag) {
-            printf("removed directory: %s\n", parent_path);
-        }
-        parent_path = dirname(parent_path);  // 상위 디렉토리로 이동
-    }
-    free(parent_path);
-}
-
 void cmd_rmdir(int argc, char **argv) {
     int opt;
     int p_flag = 0;    // -p 옵션 플래그 (부모 디렉토리 제거)
@@ -60,12 +39,7 @@ void cmd_rmdir(int argc, char **argv) {
         if (rmdir(new_path) != 0) {
             perror("rmdir");
         } else if (v_flag) {
-            printf("removed directory: %s\n", new_path);
-        }
-
-        // 부모 디렉토리 제거하는 경우
-        if (p_flag) {
-            remove_parent_directories(new_path, v_flag);
+            printf("removed directory: %s\n", argv[i]);
         }
 
         free(new_path);

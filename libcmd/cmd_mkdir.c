@@ -5,20 +5,35 @@ static void mkdir_func(int argc, char **argv, int p_flag, int v_flag, int mode, 
 
     // -p 옵션이 있는 경우, 부모 디렉토리도 생성
     if (p_flag) {
-        if (mkdir(dir_name, mode) == -1 && errno != EEXIST) { // 파일을 만들지 못하면(파일이 이미 있을 경우 제외)
+        // 경로를 하나씩 생성
+        char temp_path[MAX_DIR_SIZE];
+        char *p = NULL;
+        snprintf(temp_path, sizeof(temp_path), "%s", dir_name);
+
+        for (p = temp_path + 1; *p; p++) {
+            if (*p == '/') {
+                *p = '\0'; // 슬래시를 임시로 종료 문자로 바꿈
+                if (mkdir(temp_path, mode) == -1 && errno != EEXIST) {
+                    perror("mkdir");
+                    return;
+                }
+                *p = '/'; // 슬래시 복원
+            }
+        }
+        // 마지막 디렉토리 생성
+        if (mkdir(temp_path, mode) == -1 && errno != EEXIST) {
             perror("mkdir");
-            return ;
+            return;
         }
     }
-    else {// -p 옵션이 없는 경우, 디렉토리 생성
+    else // -p 옵션이 없는 경우, 디렉토리 생성
         if (mkdir(dir_name, mode) == -1) { // 파일을 만들지 못하는 경우(이미 있는 경우도 오류)
             perror("mkdir");
             return ;
         }
-    }
     // -v 옵션이 있는 경우, 생성된 디렉토리 이름 출력
     if (v_flag)
-        printf("mkdir: created directory '%s'\n", dir_name);
+        printf("mkdir: created directory '%s'\n", argv[i]);
 }
 
 
