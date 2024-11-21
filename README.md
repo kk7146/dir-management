@@ -58,5 +58,5 @@ Launch the custm-shell by executing the compiled program:
 ```
 For example:
 ```bash
-./custom-shell cp cd ls
+./custom-shell ls chmod cat cd mkdir rmdir rename ln rm cp ps kill exec
 ```

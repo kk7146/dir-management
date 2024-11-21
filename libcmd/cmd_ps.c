@@ -13,17 +13,14 @@ static void print_process_info(int pid, int u_flag) {
     uid_t uid = -1;
     char username[256] = "<unknown>";
 
-    // Build paths for cmdline and status
     snprintf(cmdline_path, sizeof(cmdline_path), CMDLINE_PATH_FORMAT, pid);
     snprintf(status_path, sizeof(status_path), STATUS_PATH_FORMAT, pid);
 
-    // Read command line
     cmdline_file = fopen(cmdline_path, "r");
-    if (!cmdline_file) return; // Skip if the process doesn't exist anymore
+    if (!cmdline_file) return;
     fgets(cmdline, sizeof(cmdline), cmdline_file);
     fclose(cmdline_file);
 
-    // Read status for user ID
     status_file = fopen(status_path, "r");
     if (status_file) {
         char line[256];
@@ -33,13 +30,11 @@ static void print_process_info(int pid, int u_flag) {
         fclose(status_file);
     }
 
-    // Convert UID to username
     if (u_flag && uid != -1) {
         pw = getpwuid(uid);
         if (pw) snprintf(username, sizeof(username), "%s", pw->pw_name);
     }
 
-    // Print process info
     if (u_flag)
         printf("%d\t%s\t%s\n", pid, username, cmdline[0] ? cmdline : "[unknown]");
     else
@@ -55,17 +50,15 @@ static int ps_func(int a_flag, int x_flag, int u_flag) {
         printf("USER\t");
     printf("CMD\n");
 
-    // Open /proc directory
     proc_dir = opendir(PROC_PATH);
     if (!proc_dir) {
         perror("opendir");
         return -1;
     }
 
-    // Iterate through /proc entries
     while ((entry = readdir(proc_dir))) {
         int pid = atoi(entry->d_name);
-        if (pid <= 0) continue; // Skip non-PID entries (like '.', '..', etc.)
+        if (pid <= 0) continue;
         print_process_info(pid, u_flag);
     }
 
@@ -75,9 +68,9 @@ static int ps_func(int a_flag, int x_flag, int u_flag) {
 
 int cmd_ps(int argc, char **argv) {
     int opt;
-    int a_flag = 0;    // -a option flag (include processes from other users)
-    int x_flag = 0;    // -x option flag (include processes not attached to a terminal)
-    int u_flag = 0;    // -u option flag (display username)
+    int a_flag = 0;   
+    int x_flag = 0;   
+    int u_flag = 0;   
 
     while ((opt = getopt(argc, argv, "axu")) != -1) {
         switch (opt) {

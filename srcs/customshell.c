@@ -58,6 +58,7 @@ int execute_shell(char *command, cmd_node *const head) {
     char *input_argv[MAX_ARG];
     int  input_argc;
     cmd_node *node;
+    optind = 1;
 
     signal(SIGINT, handle_sigint);
     while (1) {
