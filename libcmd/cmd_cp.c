@@ -34,6 +34,7 @@ int cmd_cp(int argc, char **argv) {
     int l_flag = 0, p_flag = 0, S_flag = 0, s_flag = 0;  // 속성 관련 옵션
     int v_flag = 0, X_flag = 0, x_flag = 0;              // 기타 옵션
 
+    optind = 1;
     while ((opt = getopt(argc, argv, "RHLPfinaSlpSsvXx")) != -1) {
         switch (opt) {
             case 'R':

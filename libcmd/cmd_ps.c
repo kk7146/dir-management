@@ -72,6 +72,7 @@ int cmd_ps(int argc, char **argv) {
     int x_flag = 0;   
     int u_flag = 0;   
 
+    optind = 1;
     while ((opt = getopt(argc, argv, "axu")) != -1) {
         switch (opt) {
             case 'a':

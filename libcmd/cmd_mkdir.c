@@ -46,6 +46,7 @@ int cmd_mkdir(int argc, char **argv) {
     mode_t mode = 0777;  // 권한
     int state = 0;
 
+    optind = 1;
     while ((opt = getopt(argc, argv, "pvm:")) != -1) {
         switch (opt) {
             case 'p':

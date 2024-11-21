@@ -25,6 +25,7 @@ int cmd_ln(int argc, char **argv) {
     char *new_src;
     char *new_dest;
 
+    optind = 1;
     // getopt를 사용하여 옵션 파싱
     while ((opt = getopt(argc, argv, "sfvn")) != -1) {
         switch (opt) {

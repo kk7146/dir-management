@@ -34,6 +34,7 @@ int cmd_kill(int argc, char **argv) {
     char *signal_name = NULL;
     int state = 0;
 
+    optind = 1;
     while ((opt = getopt(argc, argv, "s:l")) != -1) {
         switch (opt) {
             case 's':

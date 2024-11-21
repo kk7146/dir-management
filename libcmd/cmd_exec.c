@@ -5,6 +5,7 @@ int cmd_exec(int argc, char **argv) {
     int v_flag = 0;  // -v 옵션 플래그 (자세한 출력)
     int n_flag = 0; // -n 옵션 플래그 (명령어 출력만 하고 실행하지 않음)
 
+    optind = 1;
     while ((opt = getopt(argc, argv, "vn")) != -1) {
         switch (opt) {
             case 'v':

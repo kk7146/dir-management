@@ -38,6 +38,7 @@ int cmd_chmod(int argc, char **argv) {
     char *file_path;
     int state = 0;
     
+    optind = 1;
     while ((opt = getopt(argc, argv, "fhvR:HLP")) != -1) {
         switch (opt) {
             case 'f':
