@@ -15,7 +15,7 @@ static void print_permissions(mode_t mode) {
     printf((mode & S_IXOTH) ? "x" : "-");
 }
 
-static void ls_func(int a_flag, int l_flag, int s_flag, int r_flag){
+static int ls_func(int a_flag, int l_flag, int s_flag, int r_flag){
     DIR *dir;
     struct dirent *entry;
     struct stat statbuf;
@@ -24,11 +24,12 @@ static void ls_func(int a_flag, int l_flag, int s_flag, int r_flag){
     char timebuf[64];
     char link_target[MAX_DIR_SIZE + 1];
     char *filename;
+    int state = 0;
 
     dir = opendir(".");
     if (dir == NULL) {
         perror("ls");
-        return;
+        return -2;
     }
 
     // 디렉토리 엔트리 순회
@@ -39,6 +40,7 @@ static void ls_func(int a_flag, int l_flag, int s_flag, int r_flag){
 
         if (lstat(entry->d_name, &statbuf) == -1) {
             perror("lstat");
+            state = -1;
             continue;
         }
 
@@ -65,10 +67,11 @@ static void ls_func(int a_flag, int l_flag, int s_flag, int r_flag){
         printf("\n");
     }
     closedir(dir);
+    return state;
 }
 
 // ls 명령어 함수
-void cmd_ls(int argc, char **argv) {
+int cmd_ls(int argc, char **argv) {
     int opt;
     int a_flag = 0;     // -a 옵션 플래그 (숨김 파일 표시)
     int l_flag = 0;  // -l 옵션 플래그 (상세 정보 표시)
@@ -92,10 +95,10 @@ void cmd_ls(int argc, char **argv) {
                 break;
             default:
                 usage_ls();
-                return;
+                return -2;
         }
     }
-    ls_func(a_flag, l_flag, s_flag, r_flag);
+    return ls_func(a_flag, l_flag, s_flag, r_flag);
 }
 
 // ls 사용법 출력 함수

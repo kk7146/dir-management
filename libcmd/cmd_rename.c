@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 // rename 명령어 함수
-void cmd_rename(int argc, char **argv) {
+int cmd_rename(int argc, char **argv) {
     int opt;
     int f_flag = 0;   // -f 옵션 플래그 (강제 덮어쓰기)
     int i_flag = 0; // -i 옵션 플래그 (대화형 모드)
@@ -26,7 +26,7 @@ void cmd_rename(int argc, char **argv) {
                 break;
             default:
                 usage_rename();
-                return;
+                return -2;
         }
     }
 
@@ -34,7 +34,7 @@ void cmd_rename(int argc, char **argv) {
     if (optind >= argc - 1) {
         printf("rename: missing source or target argument\n");
         usage_rename();
-        return;
+        return -2;
     }
 
     new_src = resolve_path(argv[optind]);
@@ -45,7 +45,7 @@ void cmd_rename(int argc, char **argv) {
         if (new_src) free(new_src);
         if (new_dest) free(new_dest);
         printf("rename: failed to allocate memory\n");
-        return;
+        return -1;
     }
 
     // 대화형 모드: 기존 파일이 있으면 사용자에게 확인 요청
@@ -56,19 +56,23 @@ void cmd_rename(int argc, char **argv) {
             printf("rename: operation canceled\n");
             free(new_src);
             free(new_dest);
-            return;
+            return 0;
         }
     }
 
     // rename 호출
     if (rename(new_src, new_dest) != 0) {
         perror("rename");
-    } else if (v_flag) {
+        free(new_src);
+        free(new_dest);
+        return -1;
+    }
+    else if (v_flag) {
         printf("Renamed '%s' to '%s'\n", argv[optind], argv[optind + 1]);
     }
-
     free(new_src);
     free(new_dest);
+    return 0;
 }
 
 // rename 사용법 출력 함수

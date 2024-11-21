@@ -1,16 +1,16 @@
 #include "libcmd.h"
 
-static void cp_func(const char *source, const char *destination, int verbose) {
+static int cp_func(const char *source, const char *destination, int verbose) {
     FILE *src_file = fopen(source, "r");
     if (src_file == NULL) {
         perror("cp (source)");
-        return;
+        return -1;
     }
     FILE *dest_file = fopen(destination, "w");
     if (dest_file == NULL) {
         perror("cp (destination)");
         fclose(src_file);
-        return;
+        return -1;
     }
     char buffer[1024];
     size_t bytes;
@@ -22,9 +22,10 @@ static void cp_func(const char *source, const char *destination, int verbose) {
     if (verbose) {
         printf("File copied from %s to %s\n", source, destination);
     }
+    return 0;
 }
 
-void cmd_cp(int argc, char **argv) {
+int cmd_cp(int argc, char **argv) {
     int opt;
     char *src = NULL;
     char *dest = NULL;
@@ -88,29 +89,35 @@ void cmd_cp(int argc, char **argv) {
                 break;
             default:
                 usage_cp();
-                return;
+                return -2;
         }
     }
 
     if (optind >= argc - 1) {
         fprintf(stderr, "cp: missing source or destination argument\n");
         usage_cp();
-        return;
+        return -2;
     }
 
     src = resolve_path(argv[optind++]);
     if (check_null_pointer(src)) {
-        return;
+        return -1;
     }
     dest = resolve_path(argv[optind]);
     if (check_null_pointer(dest)) {
         free(src);
-        return;
+        return -1;
     }
 
-    cp_func(src, dest, v_flag);
+    if (cp_func(src, dest, v_flag) == -1)
+    {
+        free(src);
+        free(dest);
+        return -1;
+    }
     free(src);
     free(dest);
+    return 0;
 }
 
 void usage_cp() {

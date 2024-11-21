@@ -1,57 +1,54 @@
 #include "libcmd.h"
 #include <ctype.h>
 
-static void cat_func(FILE *file, int b_flag, int e_flag, int n_flag, int s_flag, int t_flag, int u_flag, int v_flag) {
+static void s_flag_func(int *previous_blank, char first_char) {
+    if (first_char == '\n') {
+        if (*previous_blank)
+            return ;
+        *previous_blank = 1;
+    }
+    else
+        *previous_blank = 0;
+}
+
+static void cat_func(FILE *file, int b_flag, int e_flag, int n_flag, int s_flag, int t_flag, int u_flag, int v_flag) { // 플래그에 따른 구현부
     char line[1024];
     int line_number = 1;
     int previous_blank = 0;
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        
-        // s 플래수 \n가 연속으로 나올 경우 출력하지 않고 다음 분기로
-        if (s_flag) {
-            if (line[0] == '\n') {
-                if (previous_blank)
-                    continue;
-                previous_blank = 1;
-            }
-            else
-                previous_blank = 0;
-        }
+
+        if (s_flag)
+            s_flag_func(&previous_blank, line[0]);
 
         // 줄 수 보이게 처리. b의 경우에는 아무 것도 없는 줄의 경우만 출력.
         if (n_flag || (b_flag && line[0] != '\n'))
             printf("%6d  ", line_number++);
 
         //이제 전처리 끝. 문자 출력
-        // '$' 문자가 끝에 나오게 근데 v도 같이 동작.
         if (e_flag || t_flag || v_flag) {
             for (char *p = line; *p != '\0'; p++) {
-            // 제어 문자인 경우 (줄 바꿈과 탭 제외)
                 if (iscntrl((unsigned char)*p) && *p != '\n' && *p != '\t') {
-                    if ((unsigned char)*p == 127) // 삭제 문자 처리
+                    if ((unsigned char)*p == 127)
                         printf("^?");
                     else
                         printf("^%c", *p + '@');
                 }
-                // 비ASCII 문자 (하이 비트가 1인 경우)
                 else if ((unsigned char)*p >= 128)
                     printf("M-%c", (unsigned char)*p & 0x7F);
-                // 줄 바꿈 문자 처리 (-e 옵션)
                 else if (*p == '\n') {
                     if (e_flag)
-                        printf("$\n"); // '$' 기호 추가 후 줄바꿈
+                        printf("$\n");
                     else
-                        putchar(*p); // 그냥 줄바꿈
+                        putchar(*p);
                 }
                 // 탭 문자 처리 (-t 옵션)
                 else if (*p == '\t') {
                     if (t_flag)
                         printf("^I");
                     else
-                        putchar(*p); // 그냥 탭
+                        putchar(*p);
                 }
-                // 나머지 인쇄 가능한 문자 처리
                 else
                     putchar(*p);
             }
@@ -61,10 +58,11 @@ static void cat_func(FILE *file, int b_flag, int e_flag, int n_flag, int s_flag,
     }
 }
 
-void cmd_cat(int argc, char **argv) {
+int cmd_cat(int argc, char **argv) { // cat 명령어 구현부
     char *file_path;
     int opt;
     int b_flag = 0, e_flag = 0, n_flag = 0, s_flag = 0, t_flag = 0, u_flag = 0, v_flag = 0;
+    int state = 0;
 
     while ((opt = getopt(argc, argv, "benstuv")) != -1) {
         switch (opt) {
@@ -99,32 +97,35 @@ void cmd_cat(int argc, char **argv) {
                 break;
             default:
                 usage_cat();
-                return;
+                return -2;
         }
     }
 
     if (optind >= argc) {
         usage_cat();
-        return;
+        return -2;
     }
 
-    for (int i = optind; i < argc; i++) {
+    for (int i = optind; i < argc; i++) { // optind로 변환 후 끝까지 파일 다 읽어봄.
         file_path = resolve_path(argv[i]);
         if (file_path == NULL)
         {
             printf("cat: invalid filename argument\n");
+            state = -1;
             continue;
         }
         FILE *file = fopen(file_path, "r");
         if (file == NULL) {
             perror("cat");
             free(file_path);
+            state = -1;
             continue;
         }
         cat_func(file, b_flag, e_flag, n_flag, s_flag, t_flag, u_flag, v_flag);
         free(file_path);
         fclose(file);
     }
+    return state;
 }
 
 void usage_cat() {

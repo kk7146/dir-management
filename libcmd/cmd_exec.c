@@ -1,6 +1,6 @@
 #include "libcmd.h"
 
-void cmd_exec(int argc, char **argv) {
+int cmd_exec(int argc, char **argv) {
     int opt;
     int v_flag = 0;  // -v 옵션 플래그 (자세한 출력)
     int n_flag = 0; // -n 옵션 플래그 (명령어 출력만 하고 실행하지 않음)
@@ -15,14 +15,14 @@ void cmd_exec(int argc, char **argv) {
                 break;
             default:
                 usage_exec();
-                return;
+                return -2;
         }
     }
 
     // 명령어가 없는 경우
     if (optind >= argc) {
         usage_exec();
-        return;
+        return -2;
     }
 
     // 명령어를 하나의 문자열로 결합
@@ -42,14 +42,16 @@ void cmd_exec(int argc, char **argv) {
     // -n 옵션: 명령어를 출력만 하고 실행하지 않음
     if (n_flag) {
         printf("Command not executed due to -n option: %s\n", command);
-        return;
+        return 0;
     }
 
     int result = system(command);
     if (result == -1) {
         perror("system");
+        return -1;
     } else {
         printf("Command executed with result: %d\n", result);
+        return 0;
     }
 }
 

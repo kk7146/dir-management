@@ -17,7 +17,7 @@
 # define PID_SIZE 32768
 # define MAX_CMD_NAME 10
 
-# define DECLARE_CMDFUNC(str)   void cmd_##str(int argc, char **argv); \
+# define DECLARE_CMDFUNC(str)   int cmd_##str(int argc, char **argv); \
                                 void usage_##str(void)
 
 DECLARE_CMDFUNC(ls);
@@ -34,7 +34,7 @@ DECLARE_CMDFUNC(ps);
 DECLARE_CMDFUNC(kill);
 DECLARE_CMDFUNC(exec);
 
-typedef void  (*cmd_func_t)(int argc, char **argv);
+typedef int  (*cmd_func_t)(int argc, char **argv);
 typedef void (*usage_func_t)(void);
 
 typedef struct cmd_list {

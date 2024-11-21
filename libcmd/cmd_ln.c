@@ -16,7 +16,7 @@ static void print_permissions(mode_t mode) {
 }
 
 // ln 명령어 함수
-void cmd_ln(int argc, char **argv) {
+int cmd_ln(int argc, char **argv) {
     int opt;
     int s_flag = 0;  // -s 옵션 플래그
     int f_flag = 0;     // -f 옵션 플래그
@@ -42,7 +42,7 @@ void cmd_ln(int argc, char **argv) {
                 break;
             default:
                 usage_ln();
-                return;
+                return -2;
         }
     }
 
@@ -50,17 +50,17 @@ void cmd_ln(int argc, char **argv) {
     if (optind >= argc - 1) {
         printf("ln: missing original or new link argument\n");
         usage_ln();
-        return;
+        return -2;
     }
 
     new_src = resolve_path(argv[optind]);
     if (check_null_pointer(new_src)) {
-        return;
+        return -1;
     }
     new_dest = resolve_path(argv[optind + 1]);
     if (check_null_pointer(new_dest)) {
         free(new_src);
-        return;
+        return -1;
     }
 
     // 강제 덮어쓰기 처리
@@ -69,7 +69,7 @@ void cmd_ln(int argc, char **argv) {
             perror("ln -f");
             free(new_src);
             free(new_dest);
-            return;
+            return -1;
         }
     }
 
@@ -77,19 +77,25 @@ void cmd_ln(int argc, char **argv) {
     if (s_flag) {
         if (symlink(new_src, new_dest) != 0) {
             perror("ln -s");
+            free(new_src);
+            free(new_dest);
+            return -1;
         } else if (v_flag) {
             printf("Symbolic link created: %s -> %s\n", argv[optind + 1], argv[optind]);
         }
     } else {  // 하드 링크 생성
         if (link(new_src, new_dest) != 0) {
             perror("ln");
-        } else if (v_flag) {
+            free(new_src);
+            free(new_dest);
+            return -1;
+        } else if (v_flag)
             printf("Hard link created: %s -> %s\n", argv[optind + 1], argv[optind]);
-        }
     }
 
     free(new_src);
     free(new_dest);
+    return 0;
 }
 
 // ln 사용법 출력 함수

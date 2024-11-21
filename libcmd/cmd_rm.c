@@ -1,13 +1,13 @@
 #include "libcmd.h"
 
 // 파일 또는 디렉토리를 삭제하는 함수
-static void rm_func(const char *path, int f_flag, int i_flag, int r_flag, int v_flag) {
+static int rm_func(const char *path, int f_flag, int i_flag, int r_flag, int v_flag) {
     struct stat statbuf;
     if (lstat(path, &statbuf) == -1) {
         if (!f_flag) {
             perror("rm");
         }
-        return;
+        return -1;
     }
 
     // 디렉토리 처리
@@ -16,7 +16,7 @@ static void rm_func(const char *path, int f_flag, int i_flag, int r_flag, int v_
             if (!f_flag) {
                 fprintf(stderr, "rm: %s: is a directory\n", path);
             }
-            return;
+            return -1;
         }
 
         DIR *dir = opendir(path);
@@ -24,7 +24,7 @@ static void rm_func(const char *path, int f_flag, int i_flag, int r_flag, int v_
             if (!f_flag) {
                 perror("rm");
             }
-            return;
+            return -1;
         }
 
         struct dirent *entry;
@@ -42,11 +42,12 @@ static void rm_func(const char *path, int f_flag, int i_flag, int r_flag, int v_
         if (rmdir(path) == -1) {
             if (!f_flag) {
                 perror("rm");
+                return -1;
             }
         } else if (v_flag) {
             printf("removed directory: %s\n", path);
         }
-        return;
+        return 0;
     }
 
     // 파일 삭제 전 확인 요청
@@ -55,7 +56,7 @@ static void rm_func(const char *path, int f_flag, int i_flag, int r_flag, int v_
         char response = getchar();
         if (response != 'y' && response != 'Y') {
             printf("rm: operation canceled for %s\n", path);
-            return;
+            return 0;
         }
     }
 
@@ -63,20 +64,23 @@ static void rm_func(const char *path, int f_flag, int i_flag, int r_flag, int v_
     if (unlink(path) == -1) {
         if (!f_flag) {
             perror("rm");
+            return -1;
         }
     } else if (v_flag) {
         printf("removed: %s\n", path);
     }
+    return 0;
 }
 
 // rm 명령어 함수
-void cmd_rm(int argc, char **argv) {
+int cmd_rm(int argc, char **argv) {
     int opt;
     int f_flag = 0;       // -f 옵션 플래그 (강제 삭제)
     int i_flag = 0; // -i 옵션 플래그 (삭제 전 확인)
     int r_flag = 0;   // -R 또는 -r 옵션 플래그 (재귀 삭제)
     int v_flag = 0;     // -v 옵션 플래그 (자세한 출력)
     char *file_name;
+    int state = 0;
 
     // getopt를 사용하여 옵션 파싱
     while ((opt = getopt(argc, argv, "fidRrv")) != -1) {
@@ -100,21 +104,23 @@ void cmd_rm(int argc, char **argv) {
                 break;
             default:
                 usage_rm();
-                return;
+                return -2;
         }
     }
 
     if (optind >= argc) {
         fprintf(stderr, "rm: missing operand\n");
         usage_rm();
-        return;
+        return -2;
     }
 
     for (int i = optind; i < argc; i++) {
         file_name = resolve_path(argv[i]);
-        rm_func(argv[i], f_flag, i_flag, r_flag, v_flag);
+        
+        state = rm_func(argv[i], f_flag, i_flag, r_flag, v_flag);
         free(file_name);
     }
+    return state;
 }
 
 // rm 사용법 출력 함수

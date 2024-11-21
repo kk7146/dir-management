@@ -27,11 +27,12 @@ void list_signals() {
     printf("15: TERM\n");
 }
 
-void cmd_kill(int argc, char **argv) {
+int cmd_kill(int argc, char **argv) {
     int opt;
     int signal = SIGTERM;
     int list_flag = 0;
     char *signal_name = NULL;
+    int state = 0;
 
     while ((opt = getopt(argc, argv, "s:l")) != -1) {
         switch (opt) {
@@ -43,14 +44,14 @@ void cmd_kill(int argc, char **argv) {
                 break;
             default:
                 usage_kill();
-                return;
+                return -2;
         }
     }
 
     // 시그널 목록 출력
     if (list_flag) {
         list_signals();
-        return;
+        return 0;
     }
 
     // 시그널 이름을 시그널 번호로 변환
@@ -58,7 +59,7 @@ void cmd_kill(int argc, char **argv) {
         signal = signal_name_to_number(signal_name);
         if (signal == -1) {
             printf("Invalid signal name: %s\n", signal_name);
-            return;
+            return -2;
         }
     }
 
@@ -66,13 +67,14 @@ void cmd_kill(int argc, char **argv) {
     if (optind >= argc) {
         printf("Missing PID\n");
         usage_kill();
-        return;
+        return -2;
     }
 
     for (int i = optind; i < argc; i++) {
         pid_t pid = atoi(argv[i]);
         if (pid <= 0) {
             printf("Invalid PID: %s\n", argv[i]);
+            state = -2;
             continue;
         }
 
@@ -81,8 +83,10 @@ void cmd_kill(int argc, char **argv) {
             printf("Signal %d sent to process %d.\n", signal, pid);
         } else {
             perror("kill");
+            state = -1;
         }
     }
+    return state;
 }
 
 void usage_kill() {
