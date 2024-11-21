@@ -19,7 +19,15 @@ static void cat_func(FILE *file, int b_flag, int e_flag, int n_flag, int s_flag,
     while (fgets(line, sizeof(line), file) != NULL) {
 
         if (s_flag)
-            s_flag_func(&previous_blank, line[0]);
+        {
+            if (line[0] == '\n') {
+                if (previous_blank)
+                    return ;
+                previous_blank = 1;
+            }
+            else
+                previous_blank = 0;
+        }
 
         // 줄 수 보이게 처리. b의 경우에는 아무 것도 없는 줄의 경우만 출력.
         if (n_flag || (b_flag && line[0] != '\n'))
