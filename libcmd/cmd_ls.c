@@ -34,6 +34,16 @@ static int ls_func(int a_flag, int l_flag, int s_flag, int r_flag){
 
     // 디렉토리 엔트리 순회
     while ((entry = readdir(dir)) != NULL) {
+        if (l_flag) {
+            print_permissions(statbuf.st_mode);
+            printf(" %ld ", (long)statbuf.st_nlink);
+            pw = getpwuid(statbuf.st_uid);
+            gr = getgrgid(statbuf.st_gid);
+            printf("%s %s ", pw->pw_name, gr->gr_name);
+            printf("%5lld ", (long long)statbuf.st_size);
+            strftime(timebuf, sizeof(timebuf), "%b %d %H:%M", localtime(&statbuf.st_mtime));
+            printf("%s ", timebuf);
+        }
         if (!a_flag && entry->d_name[0] == '.') {
             continue;  // -a 옵션이 없는 경우 숨김 파일 무시
         }
@@ -45,16 +55,6 @@ static int ls_func(int a_flag, int l_flag, int s_flag, int r_flag){
         }
 
         // 상세 정보 표시 (-l 옵션)
-        if (l_flag) {
-            print_permissions(statbuf.st_mode);
-            printf(" %ld ", (long)statbuf.st_nlink);
-            pw = getpwuid(statbuf.st_uid);
-            gr = getgrgid(statbuf.st_gid);
-            printf("%s %s ", pw->pw_name, gr->gr_name);
-            printf("%5lld ", (long long)statbuf.st_size);
-            strftime(timebuf, sizeof(timebuf), "%b %d %H:%M", localtime(&statbuf.st_mtime));
-            printf("%s ", timebuf);
-        }
         printf("%s", entry->d_name);
         // 심볼릭 링크 대상 표시
         if (S_ISLNK(statbuf.st_mode)) {
