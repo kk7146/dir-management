@@ -9,7 +9,6 @@
 # include <grp.h>
 # include <time.h>
 # include <signal.h>
-# include <libproc.h>
 # include <errno.h>
 # include <stdlib.h>
 # include "util.h"
