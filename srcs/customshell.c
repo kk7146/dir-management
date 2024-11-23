@@ -83,7 +83,6 @@ int execute_shell(char *command, cmd_node *const head) {
             else
                 printf("%s: command not found\n", input_argv[0]);
         }
-        optreset = 1;
         optind = 1;
     }
     return -1;
