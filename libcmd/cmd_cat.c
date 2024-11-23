@@ -1,16 +1,6 @@
 #include "libcmd.h"
 #include <ctype.h>
 
-static void s_flag_func(int *previous_blank, char first_char) {
-    if (first_char == '\n') {
-        if (*previous_blank)
-            return ;
-        *previous_blank = 1;
-    }
-    else
-        *previous_blank = 0;
-}
-
 static void cat_func(FILE *file, int b_flag, int e_flag, int n_flag, int s_flag, int t_flag, int u_flag, int v_flag) { // 플래그에 따른 구현부
     char line[1024];
     int line_number = 1;
