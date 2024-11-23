@@ -55,13 +55,14 @@ int init() { // 프로그램 실행 경로가 BASE_DIR이 아닌 경우 해당 �
 
 int execute_shell(char *command, cmd_node *const head) {
     char *tok_str;
-    char *input_argv[MAX_ARG];
-    int  input_argc;
     cmd_node *node;
     optind = 1;
 
     signal(SIGINT, handle_sigint);
     while (1) {
+        char *input_argv[MAX_ARG];
+        int  input_argc;
+
         optind = 1;
         node = head;
         if (print_shell_dir() != 0)
