@@ -27,6 +27,7 @@ int cmd_ln(int argc, char **argv) {
 
     optind = 1;
     // getopt를 사용하여 옵션 파싱
+    printf("%d\n", optind);
     while ((opt = getopt(argc, argv, "sfvn")) != -1) {
         switch (opt) {
             case 's':
