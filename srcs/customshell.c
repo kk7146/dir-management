@@ -80,7 +80,7 @@ int execute_shell(char *command, cmd_node *const head) {
             node = find_command(node, input_argv[0]);
             if (node != NULL)
             {
-                optind = 1;
+                optind = 0;// 1대신 0으로 초기화 해야 한다고 한다. 내위치가 아닌 부 재초기화를 위해서
                 node->cmd_func(input_argc, input_argv);
             }
             else
