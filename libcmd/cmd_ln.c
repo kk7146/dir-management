@@ -47,7 +47,7 @@ int cmd_ln(int argc, char **argv) {
                 return -2;
         }
     }
-
+    printf("%d\n", optind);
     // 원본 및 링크 이름 처리
     if (optind >= argc - 1) {
         printf("ln: missing original or new link argument\n");
