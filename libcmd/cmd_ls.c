@@ -79,7 +79,6 @@ int cmd_ls(int argc, char **argv) {
     int r_flag = 0;      // -r 옵션 플래그 (역순 정렬)
 
     // getopt를 사용하여 옵션 파싱
-    optind = 1;
     while ((opt = getopt(argc, argv, "altr")) != -1) {
         switch (opt) {
             case 'a':
@@ -96,7 +95,6 @@ int cmd_ls(int argc, char **argv) {
                 break;
             default:
                 usage_ls();
-                return -2;
         }
     }
     return ls_func(a_flag, l_flag, s_flag, r_flag);

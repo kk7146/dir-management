@@ -62,6 +62,7 @@ int execute_shell(char *command, cmd_node *const head) {
 
     signal(SIGINT, handle_sigint);
     while (1) {
+        optind = 1;
         node = head;
         if (print_shell_dir() != 0)
             return -1;
@@ -83,7 +84,6 @@ int execute_shell(char *command, cmd_node *const head) {
             else
                 printf("%s: command not found\n", input_argv[0]);
         }
-        optind = 1;
     }
     return -1;
 }

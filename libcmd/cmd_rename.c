@@ -13,7 +13,6 @@ int cmd_rename(int argc, char **argv) {
     char *new_src;
     char *new_dest;
 
-    optind = 1;
     while ((opt = getopt(argc, argv, "fiv")) != -1) {
         switch (opt) {
             case 'f':
@@ -27,7 +26,6 @@ int cmd_rename(int argc, char **argv) {
                 break;
             default:
                 usage_rename();
-                return -2;
         }
     }
 

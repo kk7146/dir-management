@@ -82,7 +82,6 @@ int cmd_rm(int argc, char **argv) {
     char *file_name;
     int state = 0;
 
-    optind = 1;
     // getopt를 사용하여 옵션 파싱
     while ((opt = getopt(argc, argv, "fidRrv")) != -1) {
         switch (opt) {
@@ -105,7 +104,6 @@ int cmd_rm(int argc, char **argv) {
                 break;
             default:
                 usage_rm();
-                return -2;
         }
     }
 

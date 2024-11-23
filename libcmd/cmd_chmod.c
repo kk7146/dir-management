@@ -37,8 +37,7 @@ int cmd_chmod(int argc, char **argv) {
     char *perm_str = NULL;
     char *file_path;
     int state = 0;
-    
-    optind = 1;
+
     while ((opt = getopt(argc, argv, "fhvR:HLP")) != -1) {
         switch (opt) {
             case 'f':
@@ -69,13 +68,12 @@ int cmd_chmod(int argc, char **argv) {
                 L_flag = 0;
                 break;
             default:
-                fprintf(stderr, "Usage: chmod [-fhv] [-R [-H | -L | -P]] mode file ...\n");
-                return -2;
+                usage_chmod();
         }
     }
 
     if (optind >= argc - 1) {
-        fprintf(stderr, "Usage: chmod [-fhv] [-R [-H | -L | -P]] mode file ...\n");
+        usage_chmod();
         return -2;
     }
 
@@ -84,7 +82,7 @@ int cmd_chmod(int argc, char **argv) {
     for (int i = optind; i < argc; i++) { // 여러 파일.
         file_path = resolve_path(argv[i]);
         if (file_path == NULL) {
-            fprintf(stderr, "Usage: chmod [-fhv] [-R [-H | -L | -P]] mode file ...\n");
+            usage_chmod();
             state = -1;
             continue;
         }

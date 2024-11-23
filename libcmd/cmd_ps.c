@@ -72,7 +72,6 @@ int cmd_ps(int argc, char **argv) {
     int x_flag = 0;   
     int u_flag = 0;   
 
-    optind = 1;
     while ((opt = getopt(argc, argv, "axu")) != -1) {
         switch (opt) {
             case 'a':
@@ -86,7 +85,6 @@ int cmd_ps(int argc, char **argv) {
                 break;
             default:
                 usage_ps();
-                return -2;
         }
     }
     return ps_func(a_flag, x_flag, u_flag);

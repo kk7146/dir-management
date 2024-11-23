@@ -7,7 +7,6 @@ int cmd_rmdir(int argc, char **argv) {
     int v_flag = 0;   // -v 옵션 플래그 (자세한 출력)
     int state = 0;
 
-    optind = 1;
     while ((opt = getopt(argc, argv, "pv")) != -1) {
         switch (opt) {
             case 'p':
@@ -18,7 +17,6 @@ int cmd_rmdir(int argc, char **argv) {
                 break;
             default:
                 usage_rmdir();
-                return -2;
         }
     }
 

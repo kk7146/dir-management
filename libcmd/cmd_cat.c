@@ -62,7 +62,6 @@ int cmd_cat(int argc, char **argv) { // cat 명령어 구현부
     int b_flag = 0, e_flag = 0, n_flag = 0, s_flag = 0, t_flag = 0, u_flag = 0, v_flag = 0;
     int state = 0;
 
-    optind = 1;
     while ((opt = getopt(argc, argv, "benstuv")) != -1) {
         switch (opt) {
             case 'b':
@@ -96,7 +95,6 @@ int cmd_cat(int argc, char **argv) { // cat 명령어 구현부
                 break;
             default:
                 usage_cat();
-                return -2;
         }
     }
 

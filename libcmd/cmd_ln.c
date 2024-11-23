@@ -25,9 +25,7 @@ int cmd_ln(int argc, char **argv) {
     char *new_src;
     char *new_dest;
 
-    optind = 1;
     // getopt를 사용하여 옵션 파싱
-    printf("%d\n", optind);
     while ((opt = getopt(argc, argv, "sfvn")) != -1) {
         switch (opt) {
             case 's':
@@ -44,10 +42,8 @@ int cmd_ln(int argc, char **argv) {
                 break;
             default:
                 usage_ln();
-                return -2;
         }
     }
-    printf("%d\n", optind);
     // 원본 및 링크 이름 처리
     if (optind >= argc - 1) {
         printf("ln: missing original or new link argument\n");
